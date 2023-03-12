@@ -1,10 +1,44 @@
 import os
+import sys
 from PyQt6.QtCore import *
 from PyQt6.QtWidgets import *
 from PyQt6.QtGui import *
 from PyQt6.QtWebEngineWidgets import *
 
-import sys
+
+class AboutDialog(QDialog):
+
+    def __init__(self, *args, **kwargs):
+        super(AboutDialog, self).__init__(*args, **kwargs)
+
+        QBtn = QDialogButtonBox.Ok
+        self.buttonBox = QDialogButtonBox(QBtn)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+
+        layout = QVBoxLayout()
+
+        title = QLabel('PyQT Browser')
+        font = title.font()
+        font.setPointSize(20)
+        title.setFont(font)
+
+        layout.addWidget(title)
+
+        logo = QLabel()
+        logo.setPixmap(QPixmap(os.path.join('images', 'ma-icon-128.png')))
+        layout.addWidget(logo)
+
+        layout.addWidget(QLabel('Version 0.1'))
+        layout.addWidget(QLabel('Copyright Me'))
+
+        for i in range(0, layout.count()):
+            layout.itemAt(i).setAlignment(Qt.AlignHCenter)
+
+        layout.addWidget(self.buttonBox)
+
+        self.setLayout(layout)
+
 
 class MainWindow(QMainWindow):
 
@@ -70,21 +104,31 @@ class MainWindow(QMainWindow):
         self.menuBar().setNativeMenuBar(False)
         file_menu = self.menuBar().addMenu('&File')
 
+        # Open File
         open_file_action = QAction(QIcon(os.path.join('images', 'disk--arrow.png')), 'Open file...', self)
         open_file_action.setStatusTip('Open from file')
         open_file_action.triggered.connect(self.open_file)
         file_menu.addAction(open_file_action)
 
+        # Save File
         save_file_action = QAction(QIcon(os.path.join('images', 'disk--pencil.png')), 'Save Page As...', self)
         save_file_action.setStatusTip('Save current page to file')
         save_file_action.triggered.connect(self.save_file)
         file_menu.addAction(save_file_action)
 
+        # Help Menu
+        help_menu = self.menuBar().addMenu('&Help')
 
-        back_btn = QAction(QIcon(os.path.join('images', 'arrow-180.png')), 'Back', self)
-        back_btn.setStatusTip('Back to previous page')
-        back_btn.triggered.connect(self.browser.back)
-        navtb.addAction(back_btn)
+        about_action = QAction(QIcon(os.path.join('images', 'question.png')), 'About', self)
+        about_action.setStatusTip('Find out more')
+        about_action.triggered.connect(self.about)
+        help_menu.addAction(about_action)
+
+        navigate_browser_action = QAction(QIcon(os.path.join('images', 'lifebuoy.png')), 'Navigate', self)
+        navigate_browser_action.setStatusTip('Go to Homepage')
+        navigate_browser_action.triggered.connect(self.navigate_browser)
+        help_menu.addAction(navigate_browser_action)
+
 
     # Slot for Navigate Home
     def navigate_home(self):
@@ -135,6 +179,13 @@ class MainWindow(QMainWindow):
             html = self.browser.page().toHtml()
             with open(filename, 'w') as f:
                 f.write(html)
+
+    def navigate_browser(self):
+        self.browser.setUrl(QUrl('https://www.pythonguis.com/courses/example-browser/'))
+
+    def about(self):
+        dlg = AboutDialog()
+        dlg.exec_()
 
 
 app = QApplication(sys.argv)
